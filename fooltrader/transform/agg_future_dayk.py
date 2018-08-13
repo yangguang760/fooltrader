@@ -17,8 +17,13 @@ class agg_future_dayk(object):
         self.funcs['cffexh']=self.getCffexHisData
         self.funcs['cffexc']=self.getCffexCurrentYearData
 
-    def getAllData(self,exchange):
-        finalpd= pd.concat([self.getHisData(exchange),self.getCurrentYearData(exchange)])
+    def getAllData(self,exchange=None):
+        if exchange is None:
+            exchanges=['cffex','dce','czce','shfe']
+            pds = list(map(lambda x:self.getHisData(x),exchanges))+list(map(lambda x:self.getCurrentYearData(x),exchanges))
+            finalpd = pd.concat(pds)
+        else:
+            finalpd= pd.concat([self.getHisData(exchange),self.getCurrentYearData(exchange)])
         finalpd.set_index(['date','fproduct','symbol'],inplace=True)
         finalpd.sort_index(inplace=True)
         return finalpd
@@ -32,7 +37,7 @@ class agg_future_dayk(object):
     def getShfeHisData(self):
         pattern = re.compile(r'(\D{1,3})(\d{3,4})')
         dfs=[]
-        for i in range(2009,2017):
+        for i in range(2009,2018):
             dir = get_exchange_cache_dir(security_type='future',exchange='shfe')+"/"
             a=pd.read_excel(dir+str(i)+'_shfe_history_data.xls',header=2,skipfooter=5,usecols=list(range(0,14))).fillna(method='ffill')
             dfs.append(a)
@@ -282,3 +287,16 @@ class agg_future_dayk(object):
         for year in range(2010,pd.Timestamp.today().year):
             tempdfs.append(self.getCffexYearData(year))
         return pd.concat(tempdfs)
+
+    def getSummary(self,df):
+        grouped = df.groupby(['date','fproduct'])
+        summaryData=[]
+        for name,group in grouped:
+            fgroup=group[group['settleDate']>group.index.get_level_values(0)]
+            maxInventory = fgroup.sort_values(by='inventory',ascending=False).iloc[:3,:].index.get_level_values(2).values
+            maxVolume = fgroup.sort_values(by='volume',ascending=False).iloc[:3,:].index.get_level_values(2).values
+            nearest = fgroup.sort_values(by='settleDate',ascending=True).iloc[:3,:].index.get_level_values(2).values
+            names = [name[0].strftime(format='%Y%m%d'),name[1]]
+            print(names)
+            summaryData.append(reduce(lambda x,y:x+y,[names,list(maxInventory),list(maxVolume),list(nearest)]))
+        return pd.DataFrame(summaryData)
