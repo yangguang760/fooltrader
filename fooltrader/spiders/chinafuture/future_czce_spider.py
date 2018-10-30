@@ -27,7 +27,7 @@ class FutureCzceSpider(scrapy.Spider):
         self.trading_dates = None
 
     def start_requests(self):
-        if self.dataType is None:
+        if self.dataType is None or self.dataType=='dayk':
             today = pd.Timestamp.today()
             for date in pd.date_range(start=today.date()-pd.Timedelta(days=today.dayofyear-1),end=today):
                 the_dir = get_exchange_cache_path(security_type='future',exchange='czce',the_date=to_timestamp(date),data_type='day_kdata')+'.xls'

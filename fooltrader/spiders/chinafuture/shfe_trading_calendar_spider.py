@@ -62,7 +62,7 @@ class ShfeTradingCalendarSpider(scrapy.Spider):
     def spider_closed(self, spider, reason):
         if self.trading_dates:
             if self.saved_trading_dates:
-                self.trading_dates.append(self.saved_trading_dates)
+                self.trading_dates = self.trading_dates+ self.saved_trading_dates
             result_list = drop_duplicate(self.trading_dates)
             result_list = sorted(result_list)
 

@@ -3,7 +3,7 @@
 from datetime import datetime
 
 from elasticsearch_dsl import connections
-from kafka import KafkaProducer
+# from kafka import KafkaProducer
 
 from fooltrader.api.computing import *
 from fooltrader.api.event import *
@@ -103,7 +103,7 @@ try:
 except Exception as e:
     logger.exception(e)
 
-try:
-    kafka_producer = KafkaProducer(bootstrap_servers=KAFKA_HOST)
-except Exception as e:
-    logger.exception(e)
+# try:
+#     kafka_producer = KafkaProducer(bootstrap_servers=KAFKA_HOST)
+# except Exception as e:
+#     logger.exception(e)

@@ -72,14 +72,16 @@ class agg_future_dayk(object):
         file_list=os.listdir(dir)
         tempdfs=[]
         for file in file_list:
-            with open(os.path.join(dir,file)) as f:
-                load_dict = json.load(f)
-                temp_df = pd.DataFrame(data=load_dict['o_curinstrument'])
-                temp_df['date'] = file
-                temp_df['date'] = pd.to_datetime(temp_df['date'],format="%Y%m%d")
-                tempdfs.append(temp_df)
+            if len(file)==8:
+                with open(os.path.join(dir,file)) as f:
+                    load_dict = json.load(f)
+                    temp_df = pd.DataFrame(data=load_dict['o_curinstrument'])
+                    temp_df['date'] = file
+                    temp_df['date'] = pd.to_datetime(temp_df['date'],format="%Y%m%d")
+                    tempdfs.append(temp_df)
         aggdf=pd.concat(tempdfs)
         aggdf= aggdf[aggdf['DELIVERYMONTH']!='小计' ]
+        aggdf= aggdf[aggdf['DELIVERYMONTH']!='合计' ]
         aggdf= aggdf[aggdf['DELIVERYMONTH']!=""]
         aggdf= aggdf[aggdf['DELIVERYMONTH']!="efp"]
         aggdf['symbol']=aggdf['PRODUCTID'].apply(lambda x:x.strip().replace("_f",""))+aggdf['DELIVERYMONTH']
@@ -297,6 +299,5 @@ class agg_future_dayk(object):
             maxVolume = fgroup.sort_values(by='volume',ascending=False).iloc[:3,:].index.get_level_values(2).values
             nearest = fgroup.sort_values(by='settleDate',ascending=True).iloc[:3,:].index.get_level_values(2).values
             names = [name[0].strftime(format='%Y%m%d'),name[1]]
-            print(names)
             summaryData.append(reduce(lambda x,y:x+y,[names,list(maxInventory),list(maxVolume),list(nearest)]))
         return pd.DataFrame(summaryData)

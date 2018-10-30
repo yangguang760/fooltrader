@@ -25,10 +25,11 @@ class FutureShfeSpider(scrapy.Spider):
     def __init__(self, name=None, **kwargs):
         super().__init__(name, **kwargs)
         self.trading_dates = None
+        self.dataType = None
 
     def start_requests(self):
         self.trading_dates = self.settings.get("trading_dates")
-        if self.dataType or self.dataType=='inventory':
+        if self.dataType=='inventory':
             today = pd.Timestamp.today()
             for date in pd.date_range(start=today.date()-pd.Timedelta(weeks=520),end=today):
                 the_dir=get_exchange_cache_path(security_type='future',exchange='shfe',the_date=to_timestamp(date),data_type='inventory')+'.json'

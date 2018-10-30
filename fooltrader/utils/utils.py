@@ -258,6 +258,7 @@ def next_date(the_time):
 
 def drop_duplicate(the_list):
     return list(set(the_list))
+    # return the_list
 
 
 if __name__ == '__main__':
