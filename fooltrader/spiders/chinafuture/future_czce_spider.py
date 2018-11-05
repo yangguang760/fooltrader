@@ -22,25 +22,26 @@ class FutureCzceSpider(scrapy.Spider):
 
     }
 
-    def __init__(self, name=None, **kwargs):
+    def __init__(self, dataType=None, name=None, **kwargs):
         super().__init__(name, **kwargs)
         self.trading_dates = None
+        self.dataType=dataType
 
     def start_requests(self):
-        if self.dataType is None or self.dataType=='dayk':
+        if self.dataType is None or self.dataType=='day_kdata':
             today = pd.Timestamp.today()
             for date in pd.date_range(start=today.date()-pd.Timedelta(days=today.dayofyear-1),end=today):
                 the_dir = get_exchange_cache_path(security_type='future',exchange='czce',the_date=to_timestamp(date),data_type='day_kdata')+'.xls'
                 if(date.dayofweek<5 and not os.path.exists(the_dir)):
-                    yield Request(url="http://www.czce.com.cn/portal/DFSStaticFiles/Future/"+date.strftime("%Y/%Y%m%d")+"/FutureDataDaily.xls",callback=self.download_czce_kline_data,meta={'filename':the_dir})
+                    yield Request(url="http://www.czce.com.cn/cn/DFSStaticFiles/Future/"+date.strftime("%Y/%Y%m%d")+"/FutureDataDaily.xls",callback=self.download_czce_kline_data,meta={'filename':the_dir})
         elif self.dataType=='historyk':
-            yield Request(url="http://www.czce.com.cn/portal/jysj/qhjysj/lshqxz/A09112017index_1.htm",callback=self.download_czce_history_data)
+            yield Request(url="http://www.czce.com.cn/cn/jysj/qhjysj/lshqxz/A09112017index_1.htm",callback=self.download_czce_history_data)
         elif self.dataType=='inventory':
             today = pd.Timestamp.today()
             for date in pd.date_range(start=today.date()-pd.Timedelta(weeks=450),end=today):
                 the_dir = get_exchange_cache_path(security_type='future',exchange='czce',the_date=to_timestamp(date),data_type='inventory')+'.xls'
                 if(date.dayofweek<5 and not os.path.exists(the_dir)):
-                    yield Request(url="http://www.czce.com.cn/portal/DFSStaticFiles/Future/"+date.strftime("%Y/%Y%m%d")+"/FutureDataHolding.xls",callback=self.download_czce_kline_data,meta={'filename':the_dir})
+                    yield Request(url="http://www.czce.com.cn/cn/DFSStaticFiles/Future/"+date.strftime("%Y/%Y%m%d")+"/FutureDataHolding.xls",callback=self.download_czce_kline_data,meta={'filename':the_dir})
 
 
 
@@ -48,7 +49,7 @@ class FutureCzceSpider(scrapy.Spider):
         content_type_header = response.headers.get('content-type', None)
         the_path = response.meta['filename']
 
-        if content_type_header.decode("utf-8") == 'application/zip' or content_type_header.decode("utf-8") == 'text/csv' or content_type_header.decode("utf-8") == 'application/x-zip-compressed' or content_type_header.decode("utf-8") == 'application/excel':
+        if content_type_header.decode("utf-8") == 'application/zip' or content_type_header.decode("utf-8") == 'text/csv' or content_type_header.decode("utf-8") == 'application/x-zip-compressed' or content_type_header.decode("utf-8")=='application/vnd.ms-excel' or content_type_header.decode("utf-8") == 'application/excel':
             with open(the_path, "wb") as f:
                 f.write(response.body)
                 f.flush()
@@ -71,14 +72,14 @@ class FutureCzceSpider(scrapy.Spider):
         content_type_header = response.headers.get('content-type', None)
         the_path = response.meta['filename']
 
-        if content_type_header.decode("utf-8") == 'application/zip' or content_type_header.decode("utf-8") == 'text/csv' or content_type_header.decode("utf-8") == 'application/x-zip-compressed':
+        if content_type_header.decode("utf-8") == 'application/zip' or content_type_header.decode("utf-8") == 'text/csv' or content_type_header.decode("utf-8") == 'application/x-zip-compressed' or content_type_header.decode("utf-8")=='application/vnd.ms-excel':
             with open(the_path, "wb") as f:
                 f.write(response.body)
                 f.flush()
 
         else:
             self.logger.error(
-                "get shfe year  data failed:the_path={} url={} content type={} ".format(
+                "get czce year  data failed:the_path={} url={} content type={} ".format(
                                                                                                  the_path,
                                                                                                  response.url,
                                                                                                  content_type_header))

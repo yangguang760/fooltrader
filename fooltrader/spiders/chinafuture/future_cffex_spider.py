@@ -22,12 +22,13 @@ class FutureCffexSpider(scrapy.Spider):
 
     }
 
-    def __init__(self, name=None, **kwargs):
+    def __init__(self, dataType=None, name=None, **kwargs):
         super().__init__(name, **kwargs)
         self.trading_dates = None
+        self.dataType=dataType
 
     def start_requests(self):
-        if self.dataType is None or self.dataType=='dayk':
+        if self.dataType is None or self.dataType=='day_kdata':
             daterange=pd.date_range(start='2006-06-30',end=pd.Timestamp.today())
             daterange=daterange[daterange.dayofweek<5]
             for i in daterange:

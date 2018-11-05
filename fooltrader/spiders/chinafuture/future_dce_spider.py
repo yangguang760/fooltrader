@@ -16,14 +16,16 @@ from fooltrader.utils.utils import to_timestamp
 class FutureDceSpider(scrapy.Spider):
     name = "future_dce_spider"
 
+
     custom_settings = {
         # 'DOWNLOAD_DELAY': 2,
         # 'CONCURRENT_REQUESTS_PER_DOMAIN': 8,
 
     }
 
-    def __init__(self, name=None, **kwargs):
+    def __init__(self, dataType=None,name=None, **kwargs):
         super().__init__(name, **kwargs)
+        self.dataType=dataType
 
     def start_requests(self):
         if self.dataType is None:
