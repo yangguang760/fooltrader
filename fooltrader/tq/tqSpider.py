@@ -15,7 +15,7 @@ def scrawl_tick():
         if i>0:
             tdates[datetime.strptime(trading_dates[i],'%Y%m%d')]=datetime.strptime(trading_dates[i-1],'%Y%m%d')
     path = "/home/yang/D/mdata/tqtick"
-    filteredTradingDates = list(filter(lambda y:y>datetime(2018,7,9,0,0), map(lambda x:datetime.strptime(x,'%Y%m%d'),trading_dates)))
+    filteredTradingDates = list(filter(lambda y:y>datetime(2018,11,4,0,0), map(lambda x:datetime.strptime(x,'%Y%m%d'),trading_dates)))
     exchanges = ["shfe","cffex","dce","czce"]
     api = TqApi(account_id="SIM",url="ws://192.168.56.1:7777")
     for ex in exchanges:
@@ -23,11 +23,14 @@ def scrawl_tick():
         currentYearData = currentYearData[currentYearData['date'].isin(filteredTradingDates)]
         pathpair=list(map(lambda x:(x[1].strftime('%Y%m%d')+"-"+x[0],x[0],x[1]) ,currentYearData[['symbol','date']].values))
         for i in pathpair:
+            if i[1].startswith("sc"):
+                continue
             the_dir1 = os.path.join(path,ex.upper(),str(i[2].year))
             if not os.path.exists(the_dir1):
                 os.makedirs(the_dir1)
             the_dir = os.path.join(path,ex.upper(),str(i[2].year),i[0]+".csv.gz")
             the_dir2 = os.path.join(path,ex.upper(),str(i[2].year),i[0]+".csv")
+            # print(the_dir)
             if not os.path.exists(the_dir):
                 td = tqdownloader.DataDownloader(api, symbol_list=[ex.upper()+"."+i[1]], dur_sec=0,
                         start_dt=tdates[i[2]]+timedelta(hours=17), end_dt=i[2]+timedelta(hours=13), csv_file_name=the_dir2)
