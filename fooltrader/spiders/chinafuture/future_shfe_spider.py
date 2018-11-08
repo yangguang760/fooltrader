@@ -23,7 +23,6 @@ class FutureShfeSpider(scrapy.Spider):
     }
 
     def __init__(self, name=None, **kwargs):
-        super().__init__(name, **kwargs)
         self.trading_dates = None
         self.dataType = None
 
@@ -95,10 +94,10 @@ class FutureShfeSpider(scrapy.Spider):
         return spider
 
     def spider_closed(self, spider, reason):
-        if self.trading_dates:
-            parse_shfe_day_data()
-        else:
-            parse_shfe_data()
+        # if self.trading_dates:
+            # parse_shfe_day_data()
+        # else:
+        #     parse_shfe_data()
         spider.logger.info('Spider closed: %s,%s\n', spider.name, reason)
 
     def get_year_k_data_url(self, the_year):
