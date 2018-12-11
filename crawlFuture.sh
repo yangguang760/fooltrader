@@ -2,7 +2,7 @@
 
 BASEDIR=`dirname $0`
 
-source $BASEDIR/ve/bin/activate
+source /home/yang/pyenvs/fooltrader/ve/bin/activate
 cd $BASEDIR
 export PYTHONPATH=$PYTHONPATH:.
 

@@ -15,7 +15,7 @@ def scrawl_tick():
         if i>0:
             tdates[datetime.strptime(trading_dates[i],'%Y%m%d')]=datetime.strptime(trading_dates[i-1],'%Y%m%d')
     path = "/home/yang/D/mdata/tqtick"
-    filteredTradingDates = list(filter(lambda y:y>datetime(2018,11,4,0,0), map(lambda x:datetime.strptime(x,'%Y%m%d'),trading_dates)))
+    filteredTradingDates = list(filter(lambda y:y>datetime(2018,11,30,0,0), map(lambda x:datetime.strptime(x,'%Y%m%d'),trading_dates)))
     exchanges = ["shfe","cffex","dce","czce"]
     api = TqApi(account_id="SIM",url="ws://192.168.56.1:7777")
     for ex in exchanges:
