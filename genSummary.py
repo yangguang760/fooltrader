@@ -1,5 +1,6 @@
 from fooltrader.datamanager.china_future_manager import *
 from fooltrader.transform.agg_future_dayk import agg_future_dayk
+from fooltrader.settings import SUMMARY_PATH
 import pandas as pd
 import logging
 logging.basicConfig(level=logging.DEBUG,#控制台打印的日志级别
@@ -22,4 +23,5 @@ summaryData = agg.getSummary(fullData)
 logging.info("done get summary")
 logging.info("start gen file")
 summaryData.to_csv("summary"+today+".csv",header=False,index=False)
+summaryData.to_csv(SUMMARY_PATH+ "summary.csv",header=False,index=False)
 logging.info("done for "+today)
