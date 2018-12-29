@@ -1,0 +1,3 @@
+./crawlFuture.sh
+./crawlTick.sh
+./genSummary.sh

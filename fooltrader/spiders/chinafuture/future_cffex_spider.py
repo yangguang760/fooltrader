@@ -28,6 +28,7 @@ class FutureCffexSpider(scrapy.Spider):
         self.dataType=dataType
 
     def start_requests(self):
+        self.dataType =self.settings.get("dataType")
         if self.dataType is None or self.dataType=='day_kdata':
             daterange=pd.date_range(start='2006-06-30',end=pd.Timestamp.today())
             daterange=daterange[daterange.dayofweek<5]

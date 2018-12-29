@@ -24,7 +24,9 @@ class agg_future_dayk(object):
             finalpd = pd.concat(pds)
         else:
             finalpd= pd.concat([self.getHisData(exchange),self.getCurrentYearData(exchange)])
-        finalpd.set_index(['date','fproduct','symbol'],inplace=True)
+        for i in ['volume','inventory']:
+            finalpd[i]=finalpd[i].apply(lambda x:pd.to_numeric(str(x).replace(",", "")))
+        finalpd.set_index(['date','fproduct','symbol'], inplace=True)
         finalpd.sort_index(inplace=True)
         return finalpd
 
@@ -68,7 +70,7 @@ class agg_future_dayk(object):
         return totaldf
 
     def getShfeCurrentYearData(self):
-        dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='shfe'),"2018_day_kdata")
+        dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='shfe'),"2019_day_kdata")
         file_list=os.listdir(dir)
         tempdfs=[]
         for file in file_list:
@@ -110,10 +112,10 @@ class agg_future_dayk(object):
         file_list=os.listdir(dir)
         tempdfs=[]
         for file in file_list:
-            if file.endswith('csv') and not file.startswith('2018'):
+            if file.endswith('csv') and not file.startswith('2019'):
                 temp_df = pd.read_csv(os.path.join(dir,file),encoding='gbk')
                 tempdfs.append(temp_df)
-            if file.startswith('2018'):
+            if file.startswith('2019'):
                 temp_df = pd.read_excel(os.path.join(dir,file))
                 tempdfs.append(temp_df)
         totaldf=pd.concat(tempdfs,sort=True)
@@ -142,7 +144,7 @@ class agg_future_dayk(object):
         return totaldf
 
     def getDceCurrentYearData(self):
-        dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='dce'),"2018_day_kdata")
+        dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='dce'),"2019_day_kdata")
         file_list=os.listdir(dir)
         tempdfs=[]
         symbolMap={
@@ -224,7 +226,7 @@ class agg_future_dayk(object):
 
     def getCzceCurrentYearData(self):
         pattern = re.compile(r'(\D{1,3})(\d{3,4})')
-        dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='czce'),"2018_day_kdata")
+        dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='czce'),"2019_day_kdata")
         file_list=os.listdir(dir)
         tempdfs=[]
         for file in file_list:
@@ -250,6 +252,8 @@ class agg_future_dayk(object):
         }
         aggdf.rename(index=str,columns=renameMap,inplace=True)
         aggdf=aggdf[['symbol','date','open','high','low','close','settle','range','range2','volume','inventory','fproduct','settleDate']]
+        # for i in ['volume','inventory']:
+        #     aggdf[i]=aggdf[i].apply(lambda x:pd.to_numeric(x.replace(",","")))
         return aggdf
 
     def getCffexYearData(self,year):

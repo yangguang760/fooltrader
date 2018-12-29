@@ -28,6 +28,7 @@ class FutureDceSpider(scrapy.Spider):
         self.dataType=dataType
 
     def start_requests(self):
+        self.dataType =self.settings.get("dataType")
         if self.dataType is None:
             return self.request_currentyear_kdata()
         elif self.dataType == 'historyk':

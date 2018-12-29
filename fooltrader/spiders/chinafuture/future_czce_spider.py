@@ -28,6 +28,7 @@ class FutureCzceSpider(scrapy.Spider):
         self.dataType=dataType
 
     def start_requests(self):
+        self.dataType =self.settings.get("dataType")
         if self.dataType is None or self.dataType=='day_kdata':
             today = pd.Timestamp.today()
             for date in pd.date_range(start=today.date()-pd.Timedelta(days=today.dayofyear-1),end=today):
@@ -35,7 +36,7 @@ class FutureCzceSpider(scrapy.Spider):
                 if(date.dayofweek<5 and not os.path.exists(the_dir)):
                     yield Request(url="http://www.czce.com.cn/cn/DFSStaticFiles/Future/"+date.strftime("%Y/%Y%m%d")+"/FutureDataDaily.xls",callback=self.download_czce_kline_data,meta={'filename':the_dir})
         elif self.dataType=='historyk':
-            yield Request(url="http://www.czce.com.cn/cn/jysj/qhjysj/lshqxz/A09112017index_1.htm",callback=self.download_czce_history_data)
+            yield Request(url="http://www.czce.com.cn/cn/jysj/lshqxz/H770319index_1.htm",callback=self.download_czce_history_data)
         elif self.dataType=='inventory':
             today = pd.Timestamp.today()
             for date in pd.date_range(start=today.date()-pd.Timedelta(weeks=450),end=today):
@@ -83,3 +84,13 @@ class FutureCzceSpider(scrapy.Spider):
                                                                                                  the_path,
                                                                                                  response.url,
                                                                                                  content_type_header))
+
+
+    @classmethod
+    def from_crawler(cls, crawler, *args, **kwargs):
+        spider = super(FutureCzceSpider, cls).from_crawler(crawler, *args, **kwargs)
+        crawler.signals.connect(spider.spider_closed, signal=signals.spider_closed)
+        return spider
+
+    def spider_closed(self, spider, reason):
+        spider.logger.info('Spider closed: %s,%s\n', spider.name, reason)

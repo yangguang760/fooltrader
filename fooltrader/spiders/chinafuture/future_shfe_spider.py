@@ -27,6 +27,7 @@ class FutureShfeSpider(scrapy.Spider):
         self.dataType = None
 
     def start_requests(self):
+        self.dataType =self.settings.get("dataType")
         self.trading_dates = self.settings.get("trading_dates")
         if self.dataType=='inventory':
             today = pd.Timestamp.today()

@@ -29,15 +29,23 @@ def crawl_shfe_quote():
     process_crawl(FutureShfeSpider, {
         "trading_dates": the_dates,
         'dataType':"day_kdata"})
+    process_crawl(FutureShfeSpider, {
+        'dataType':"inventory"})
 
 def crawl_cffex_quote():
     process_crawl(FutureCffexSpider, {
         'dataType':"day_kdata"})
+    process_crawl(FutureCffexSpider, {
+        'dataType':"inventory"})
 
 def crawl_dce_quote():
     process_crawl(FutureDceSpider, {
         'dataType':"day_kdata"})
+    process_crawl(FutureDceSpider, {
+        'dataType':"inventory"})
 
 def crawl_czce_quote():
     process_crawl(FutureCzceSpider, {
         'dataType':"day_kdata"})
+    process_crawl(FutureCzceSpider, {
+        'dataType':"inventory"})
