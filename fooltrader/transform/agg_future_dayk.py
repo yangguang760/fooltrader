@@ -112,10 +112,10 @@ class agg_future_dayk(object):
         file_list=os.listdir(dir)
         tempdfs=[]
         for file in file_list:
-            if file.endswith('csv') and not file.startswith('2019'):
+            if file.endswith('csv') and not file.startswith('2018'):
                 temp_df = pd.read_csv(os.path.join(dir,file),encoding='gbk')
                 tempdfs.append(temp_df)
-            if file.startswith('2019'):
+            if file.startswith('2018'):
                 temp_df = pd.read_excel(os.path.join(dir,file))
                 tempdfs.append(temp_df)
         totaldf=pd.concat(tempdfs,sort=True)
@@ -144,9 +144,7 @@ class agg_future_dayk(object):
         return totaldf
 
     def getDceCurrentYearData(self):
-        dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='dce'),"2019_day_kdata")
-        file_list=os.listdir(dir)
-        tempdfs=[]
+        dailyFileYear = ['2018','2019']
         symbolMap={
             '豆一':'a',
             '豆二':'b',
@@ -166,10 +164,14 @@ class agg_future_dayk(object):
             '聚氯乙烯':'v',
             '豆油':'y'
         }
-        for file in file_list:
-            temp_df = pd.read_csv(os.path.join(dir,file),delim_whitespace=True)
-            temp_df['date']=pd.to_datetime(file.split(".")[0],format='%Y%m%d')
-            tempdfs.append(temp_df)
+        tempdfs=[]
+        for year in dailyFileYear:
+            dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='dce'),year+"_day_kdata")
+            file_list=os.listdir(dir)
+            for file in file_list:
+                temp_df = pd.read_csv(os.path.join(dir,file),delim_whitespace=True)
+                temp_df['date']=pd.to_datetime(file.split(".")[0],format='%Y%m%d')
+                tempdfs.append(temp_df)
         aggdf=pd.concat(tempdfs)
         aggdf=aggdf[lambda x: x['商品名称'].apply(lambda y: not y.endswith('计'))]
         # aggdf['symbol']=aggdf['PRODUCTID'].apply(lambda x:x.strip().replace("_f",""))+aggdf['DELIVERYMONTH']
