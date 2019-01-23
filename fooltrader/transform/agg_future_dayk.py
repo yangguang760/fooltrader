@@ -39,7 +39,7 @@ class agg_future_dayk(object):
     def getShfeHisData(self):
         pattern = re.compile(r'(\D{1,3})(\d{3,4})')
         dfs=[]
-        for i in range(2009,2018):
+        for i in range(2009,2019):
             dir = get_exchange_cache_dir(security_type='future',exchange='shfe')+"/"
             a=pd.read_excel(dir+str(i)+'_shfe_history_data.xls',header=2,skipfooter=5,usecols=list(range(0,14))).fillna(method='ffill')
             dfs.append(a)

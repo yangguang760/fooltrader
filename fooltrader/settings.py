@@ -108,7 +108,7 @@ FORCE_DOWNLOAD_SECURITY_LIST = False
 
 DOWNLOAD_TXT_ENCODING = 'GB2312'
 
-SUMMARY_PATH = '/home/yang/D/javaProj/ygtrader/cluster/src/pack/conf/clusterConf/'
+SUMMARY_PATH = '/home/yang/ygtrader/conf/clusterConf/'
 
 AUTO_KAFKA = False
 KAFKA_HOST = 'localhost:9092'
