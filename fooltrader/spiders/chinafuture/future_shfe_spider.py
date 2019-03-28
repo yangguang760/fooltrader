@@ -28,7 +28,6 @@ class FutureShfeSpider(scrapy.Spider):
 
     def start_requests(self):
         self.dataType =self.settings.get("dataType")
-        self.trading_dates = self.settings.get("trading_dates")
         if self.dataType=='inventory':
             today = pd.Timestamp.today()
             for date in pd.date_range(start=today.date()-pd.Timedelta(weeks=520),end=today):
@@ -39,17 +38,21 @@ class FutureShfeSpider(scrapy.Spider):
                                     'the_path': the_dir},
                               callback=self.download_shfe_data_by_date)
 
-        if self.trading_dates:
+        if self.dataType=='day_kdata':
+
+            daterange=pd.date_range(start='2019-01-01',end=pd.Timestamp.today())
+            daterange=daterange[daterange.dayofweek<5]
             # 每天的数据
-            for the_date in self.trading_dates:
+            for the_date in daterange:
                 the_path = get_exchange_cache_path(security_type='future', exchange='shfe',
                                                    the_date=to_timestamp(the_date),
                                                    data_type='day_kdata')
 
-                yield Request(url=self.get_day_kdata_url(the_date=the_date),
-                              meta={'the_date': the_date,
-                                    'the_path': the_path},
-                              callback=self.download_shfe_data_by_date)
+                if not os.path.exists(the_path):
+                    yield Request(url=self.get_day_kdata_url(the_date=the_date.strftime('%Y%m%d')),
+                                  meta={'the_date': the_date,
+                                        'the_path': the_path},
+                                  callback=self.download_shfe_data_by_date)
         else:
             # 直接抓年度统计数据
             for the_year in range(2009, datetime.today().year):

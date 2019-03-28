@@ -1,5 +1,6 @@
 from fooltrader.api.technical import get_trading_calendar
 from fooltrader.transform.agg_future_dayk import agg_future_dayk
+from fooltrader.contract.files_contract import get_exchange_cache_dir, get_exchange_cache_path
 from datetime import datetime
 from datetime import timedelta
 from contextlib import closing
@@ -52,7 +53,14 @@ def scrawl_day_tick(date,ex):
 def scrawl_tick():
     agg = agg_future_dayk()
     logging.info("start filter existed symbols")
-    trading_dates = get_trading_calendar(security_type="future",exchange="shfe")
+
+
+    the_path = get_exchange_cache_dir(security_type='future', exchange='shfe',the_year='2019',
+                                       data_type='day_kdata')
+
+    trading_dates = os.listdir(the_path)
+
+    # trading_dates = get_trading_calendar(security_type="future",exchange="shfe")
     tdates = {}
     for i in range(len(trading_dates)):
         if i>0:

@@ -30,14 +30,14 @@ class FutureCffexSpider(scrapy.Spider):
     def start_requests(self):
         self.dataType =self.settings.get("dataType")
         if self.dataType is None or self.dataType=='day_kdata':
-            daterange=pd.date_range(start='2006-06-30',end=pd.Timestamp.today())
+            daterange=pd.date_range(start='2019-01-01',end=pd.Timestamp.today())
             daterange=daterange[daterange.dayofweek<5]
             for i in daterange:
                 the_dir = get_exchange_cache_path(security_type='future',exchange='cffex',data_type='day_kdata',the_date=to_timestamp(i))+".csv"
                 if not os.path.exists(the_dir):
                     yield Request(url="http://www.cffex.com.cn/sj/hqsj/rtj/"+i.strftime("%Y%m/%d/%Y%m%d")+"_1.csv",callback=self.download_cffex_history_data_file,meta={'filename':the_dir})
         elif self.dataType =='inventory':
-            daterange=pd.date_range(start='2006-06-30',end=pd.Timestamp.today())
+            daterange=pd.date_range(start='2019-01-01',end=pd.Timestamp.today())
             k=['IF','IC','IH','T','TF']
             daterange=daterange[daterange.dayofweek<5]
             for i in daterange:

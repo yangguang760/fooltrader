@@ -36,3 +36,7 @@ schedule
 pymongo
 
 tqsdk
+
+fushare
+
+html5lib
