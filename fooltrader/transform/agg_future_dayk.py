@@ -17,6 +17,19 @@ class agg_future_dayk(object):
         self.funcs['cffexh']=self.getCffexHisData
         self.funcs['cffexc']=self.getCffexCurrentYearData
 
+    def getCurrentYearAllData(self,exchange=None):
+        if exchange is None:
+            exchanges=['cffex','dce','czce','shfe']
+            pds = list(map(lambda x:self.getCurrentYearData(x),exchanges))
+            finalpd = pd.concat(pds)
+        else:
+            finalpd= pd.concat([self.getCurrentYearData(exchange)])
+        for i in ['volume','inventory']:
+            finalpd[i]=finalpd[i].apply(lambda x:pd.to_numeric(str(x).replace(",", "")))
+        finalpd.set_index(['date','fproduct','symbol'], inplace=True)
+        finalpd.sort_index(inplace=True)
+        return finalpd
+
     def getAllData(self,exchange=None):
         if exchange is None:
             exchanges=['cffex','dce','czce','shfe']
@@ -297,7 +310,10 @@ class agg_future_dayk(object):
             tempdfs.append(self.getCffexYearData(year))
         return pd.concat(tempdfs)
 
-    def getSummary(self,df):
+    def getSummary(self,df,lastDate=None):
+        if lastDate:
+            date = datetime.strptime(lastDate,"%Y%m%d")
+            df = df[df.index.get_level_values(0)>date]
         grouped = df.groupby(['date','fproduct'])
         summaryData=[]
         for name,group in grouped:

@@ -12,17 +12,20 @@ logging.basicConfig(level=logging.DEBUG,#控制台打印的日志级别
                     #日志格式
                     )
 today = pd.Timestamp.today().strftime('%Y%m%d')
+import os
+import subprocess
+(status,output) = subprocess.getstatusoutput('tail -n 1 '+SUMMARY_PATH+ "summary.csv")
+lastDate = output.split(",")[0]
+
 
 logging.info("start gen summary for "+today)
 agg = agg_future_dayk()
 logging.info("start extract all data")
-fullData = agg.getAllData()
+fullData = agg.getCurrentYearAllData()
 logging.info("complete extract all data")
-fullData.to_csv("fullData"+today+".csv",header=True,index=True)
 logging.info("start get summary")
-summaryData = agg.getSummary(fullData)
+summaryData = agg.getSummary(fullData,lastDate)
 logging.info("done get summary")
 logging.info("start gen file")
-summaryData.to_csv("summary"+today+".csv",header=False,index=False)
-summaryData.to_csv(SUMMARY_PATH+ "summary.csv",header=False,index=False)
+summaryData.to_csv(SUMMARY_PATH+ "summary.csv",header=False,index=False,mode='a')
 logging.info("done for "+today)

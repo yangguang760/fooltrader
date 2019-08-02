@@ -6,4 +6,4 @@ source /home/yang/pyenvs/fooltrader/ve/bin/activate
 cd $BASEDIR
 export PYTHONPATH=$PYTHONPATH:.
 
-exec python   $BASEDIR/genSummary.py
+exec python   $BASEDIR/genSummaryInc.py
