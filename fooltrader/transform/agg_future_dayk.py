@@ -175,7 +175,8 @@ class agg_future_dayk(object):
             '棕榈油':'p',
             '聚丙烯':'pp',
             '聚氯乙烯':'v',
-            '豆油':'y'
+            '豆油':'y',
+            '粳米':'rr'
         }
         tempdfs=[]
         for year in dailyFileYear:

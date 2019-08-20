@@ -1,12 +1,12 @@
 from fooltrader.api.technical import get_trading_calendar
+from fooltrader.tq.tqdownloader import DataDownloader
 from fooltrader.transform.agg_future_dayk import agg_future_dayk
 from fooltrader.contract.files_contract import get_exchange_cache_dir, get_exchange_cache_path
 from datetime import datetime
 from datetime import timedelta
 from contextlib import closing
 import os
-from fooltrader.tq import tqdownloader
-from tqsdk.api import TqApi
+from tqsdk.api import TqApi,TqSim
 import logging
 logging.basicConfig(level=logging.DEBUG,#控制台打印的日志级别
                     filename='yg.log',
@@ -22,7 +22,7 @@ def scrawl_day_tick(date,ex):
     logging.info("start filter existed symbols")
     path = "/home/yang/D/mdata/tqtick"
     logging.info("start getting tick data")
-    api = TqApi(account_id="SIM",url="ws://192.168.56.1:7777")
+    api = TqApi(account=TqSim(),url="ws://192.168.56.1:7777")
     logging.info(ex+": start getting tick")
     currentYearData = agg.getCurrentYearData(ex)
     currentYearData = currentYearData[currentYearData['date']==date]
@@ -42,7 +42,7 @@ def scrawl_day_tick(date,ex):
         the_dir2 = os.path.join(path,ex.upper(),str(i[2].year),i[0]+".csv")
         # print(the_dir)
         if not os.path.exists(the_dir):
-            td = tqdownloader.DataDownloader(api, symbol_list=[ex.upper()+"."+i[1]], dur_sec=0,
+            td =DataDownloader(api, symbol_list=[ex.upper()+"."+i[1]], dur_sec=0,
                                              start_dt=tdates[i[2]]+timedelta(hours=17), end_dt=i[2]+timedelta(hours=13), csv_file_name=the_dir2)
             while not td.is_finished():
                 api.wait_update()
@@ -70,14 +70,15 @@ def scrawl_tick():
     logging.info("complete filter existed symbols")
     exchanges = ["shfe","cffex","dce","czce"]
     logging.info("start getting tick data")
-    api = TqApi(account_id="SIM",url="ws://192.168.56.1:7777")
+    # api = TqApi(account=TqSim(),url="ws://192.168.56.1:7777")
+    api = TqApi(account=TqSim())
     for ex in exchanges:
         logging.info(ex+": start getting tick")
         currentYearData = agg.getCurrentYearData(ex)
         currentYearData = currentYearData[currentYearData['date'].isin(filteredTradingDates)]
         pathpair=list(map(lambda x:(x[1].strftime('%Y%m%d')+"-"+x[0],x[0],x[1]) ,currentYearData[['symbol','date']].values))
         for i in pathpair:
-            if i[1].startswith("sc"):
+            if i[1].startswith("sc") or i[1].startswith("nr"):
                 continue
             the_dir1 = os.path.join(path,ex.upper(),str(i[2].year))
             if not os.path.exists(the_dir1):
@@ -86,7 +87,7 @@ def scrawl_tick():
             the_dir2 = os.path.join(path,ex.upper(),str(i[2].year),i[0]+".csv")
             # print(the_dir)
             if not os.path.exists(the_dir):
-                td = tqdownloader.DataDownloader(api, symbol_list=[ex.upper()+"."+i[1]], dur_sec=0,
+                td =DataDownloader(api, symbol_list=[ex.upper()+"."+i[1]], dur_sec=0,
                         start_dt=tdates[i[2]]+timedelta(hours=17), end_dt=i[2]+timedelta(hours=13), csv_file_name=the_dir2)
                 while not td.is_finished():
                     api.wait_update()
