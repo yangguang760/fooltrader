@@ -95,6 +95,8 @@ AUTOTHROTTLE_DEBUG = False
 FOOLTRADER_STORE_PATH = os.environ.get('FOOLTRADER_STORE_PATH')
 if not FOOLTRADER_STORE_PATH:
     FOOLTRADER_STORE_PATH = '/home/yang/D/BaiduNetdiskDownload/fooltrader/data'
+SUMMARY_PATH = '/home/yang/ygtrader/conf/clusterConf/'
+TICK_PATH = '/home/yang/D/mdata/tqtick'
 
 STOCK_START_CODE = '000001'
 STOCK_END_CODE = '666666'
@@ -108,7 +110,6 @@ FORCE_DOWNLOAD_SECURITY_LIST = False
 
 DOWNLOAD_TXT_ENCODING = 'GB2312'
 
-SUMMARY_PATH = '/home/yang/ygtrader/conf/clusterConf/'
 
 AUTO_KAFKA = False
 KAFKA_HOST = 'localhost:9092'

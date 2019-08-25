@@ -2,6 +2,7 @@ from fooltrader.api.technical import get_trading_calendar
 from fooltrader.tq.tqdownloader import DataDownloader
 from fooltrader.transform.agg_future_dayk import agg_future_dayk
 from fooltrader.contract.files_contract import get_exchange_cache_dir, get_exchange_cache_path
+from fooltrader.settings import TICK_PATH
 from datetime import datetime
 from datetime import timedelta
 from contextlib import closing
@@ -20,7 +21,7 @@ logging.basicConfig(level=logging.DEBUG,#控制台打印的日志级别
 def scrawl_day_tick(date,ex):
     agg = agg_future_dayk()
     logging.info("start filter existed symbols")
-    path = "/home/yang/D/mdata/tqtick"
+    path = TICK_PATH
     logging.info("start getting tick data")
     api = TqApi(account=TqSim(),url="ws://192.168.56.1:7777")
     logging.info(ex+": start getting tick")
@@ -65,7 +66,7 @@ def scrawl_tick():
     for i in range(len(trading_dates)):
         if i>0:
             tdates[datetime.strptime(trading_dates[i],'%Y%m%d')]=datetime.strptime(trading_dates[i-1],'%Y%m%d')
-    path = "/home/yang/D/mdata/tqtick"
+    path = TICK_PATH
     filteredTradingDates = list(filter(lambda y:y>datetime(2018,11,30,0,0), map(lambda x:datetime.strptime(x,'%Y%m%d'),trading_dates)))
     logging.info("complete filter existed symbols")
     exchanges = ["shfe","cffex","dce","czce"]
