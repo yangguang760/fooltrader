@@ -27,7 +27,7 @@ def scrawl_day_tick(date,ex):
     logging.info(ex+": start getting tick")
     currentYearData = agg.getCurrentYearData(ex)
     currentYearData = currentYearData[currentYearData['date']==date]
-    pathpair=list(map(lambda x:(x[1].strftime('%Y%m%d')+"-"+x[0],x[0],x[1]) ,currentYearData[['symbol','date']].values))
+    pathpair=list(map(lambda x:(x[1].strftime('%Y%m%d')+"-"+x[0],x[0],datetime.utcfromtimestamp(x[1].timestamp())) ,currentYearData[['symbol','date']].values))
     trading_dates = get_trading_calendar(security_type="future",exchange="shfe")
     tdates = {}
     for i in range(len(trading_dates)):
@@ -44,7 +44,7 @@ def scrawl_day_tick(date,ex):
         # print(the_dir)
         if not os.path.exists(the_dir):
             td =DataDownloader(api, symbol_list=[ex.upper()+"."+i[1]], dur_sec=0,
-                                             start_dt=tdates[i[2]]+timedelta(hours=17), end_dt=i[2]+timedelta(hours=13), csv_file_name=the_dir2)
+                                             start_dt=tdates[i[2]]+timedelta(hours=17), end_dt=i[2]+timedelta(hours=15), csv_file_name=the_dir2)
             while not td.is_finished():
                 api.wait_update()
                 # print("progress:  tick:%.2f%%" %  td.get_progress())
@@ -59,7 +59,7 @@ def scrawl_tick():
     the_path = get_exchange_cache_dir(security_type='future', exchange='shfe',the_year='2019',
                                        data_type='day_kdata')
 
-    trading_dates = os.listdir(the_path)
+    trading_dates = sorted(os.listdir(the_path))
 
     # trading_dates = get_trading_calendar(security_type="future",exchange="shfe")
     tdates = {}
@@ -67,7 +67,7 @@ def scrawl_tick():
         if i>0:
             tdates[datetime.strptime(trading_dates[i],'%Y%m%d')]=datetime.strptime(trading_dates[i-1],'%Y%m%d')
     path = TICK_PATH
-    filteredTradingDates = list(filter(lambda y:y>datetime(2018,11,30,0,0), map(lambda x:datetime.strptime(x,'%Y%m%d'),trading_dates)))
+    filteredTradingDates = sorted(list(filter(lambda y:y>datetime(2018,11,30,0,0), map(lambda x:datetime.strptime(x,'%Y%m%d'),trading_dates))))
     logging.info("complete filter existed symbols")
     exchanges = ["shfe","cffex","dce","czce"]
     logging.info("start getting tick data")
@@ -77,7 +77,7 @@ def scrawl_tick():
         logging.info(ex+": start getting tick")
         currentYearData = agg.getCurrentYearData(ex)
         currentYearData = currentYearData[currentYearData['date'].isin(filteredTradingDates)]
-        pathpair=list(map(lambda x:(x[1].strftime('%Y%m%d')+"-"+x[0],x[0],x[1]) ,currentYearData[['symbol','date']].values))
+        pathpair=list(map(lambda x:(x[1].strftime('%Y%m%d')+"-"+x[0],x[0],datetime.utcfromtimestamp(x[1].timestamp())) ,currentYearData[['symbol','date']].values))
         for i in pathpair:
             if i[1].startswith("sc") or i[1].startswith("nr"):
                 continue
@@ -89,7 +89,7 @@ def scrawl_tick():
             # print(the_dir)
             if not os.path.exists(the_dir):
                 td =DataDownloader(api, symbol_list=[ex.upper()+"."+i[1]], dur_sec=0,
-                        start_dt=tdates[i[2]]+timedelta(hours=17), end_dt=i[2]+timedelta(hours=13), csv_file_name=the_dir2)
+                        start_dt=tdates[i[2]]+timedelta(hours=17), end_dt=i[2]+timedelta(hours=16), csv_file_name=the_dir2)
                 while not td.is_finished():
                     api.wait_update()
                     # print("progress:  tick:%.2f%%" %  td.get_progress())
