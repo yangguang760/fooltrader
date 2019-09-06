@@ -9,6 +9,7 @@ from contextlib import closing
 import os
 from tqsdk.api import TqApi,TqSim
 import logging
+import gc
 logging.basicConfig(level=logging.DEBUG,#控制台打印的日志级别
                     filename='yg.log',
                     filemode='a',##模式，有w和a，w就是写模式，每次都会重新写日志，覆盖之前的日志
@@ -72,7 +73,6 @@ def scrawl_tick():
     exchanges = ["shfe","cffex","dce","czce"]
     logging.info("start getting tick data")
     # api = TqApi(account=TqSim(),url="ws://192.168.56.1:7777")
-    api = TqApi(account=TqSim())
     for ex in exchanges:
         logging.info(ex+": start getting tick")
         currentYearData = agg.getCurrentYearData(ex)
@@ -88,10 +88,15 @@ def scrawl_tick():
             the_dir2 = os.path.join(path,ex.upper(),str(i[2].year),i[0]+".csv")
             # print(the_dir)
             if not os.path.exists(the_dir):
+                api = TqApi(account=TqSim())
                 td =DataDownloader(api, symbol_list=[ex.upper()+"."+i[1]], dur_sec=0,
                         start_dt=tdates[i[2]]+timedelta(hours=17), end_dt=i[2]+timedelta(hours=16), csv_file_name=the_dir2)
                 while not td.is_finished():
                     api.wait_update()
                     # print("progress:  tick:%.2f%%" %  td.get_progress())
                 print("done:" + the_dir)
+                api.close()
+                del td
+                del api
+                gc.collect()
         logging.info(ex+": complete getting tick")
