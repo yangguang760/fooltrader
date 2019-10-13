@@ -7,6 +7,7 @@ from datetime import datetime
 from datetime import timedelta
 from contextlib import closing
 import os
+from multiprocessing import Pool
 from tqsdk.api import TqApi,TqSim
 import logging
 import gc
@@ -52,6 +53,27 @@ def scrawl_day_tick(date,ex):
             print("done:" + the_dir)
     logging.info(ex+": complete getting tick")
 
+def scrawl_single_tick(i,path,ex,tdates):
+    the_dir1 = os.path.join(path,ex.upper(),str(i[2].year))
+    if not os.path.exists(the_dir1):
+        os.makedirs(the_dir1)
+    the_dir = os.path.join(path,ex.upper(),str(i[2].year),i[0]+".csv.gz")
+    the_dir2 = os.path.join(path,ex.upper(),str(i[2].year),i[0]+".csv")
+    # print(the_dir)
+    if not os.path.exists(the_dir):
+        api = TqApi(account=TqSim())
+        td =DataDownloader(api, symbol_list=[ex.upper()+"."+i[1]], dur_sec=0,
+                           start_dt=tdates[i[2]]+timedelta(hours=17), end_dt=i[2]+timedelta(hours=16), csv_file_name=the_dir2)
+        while not td.is_finished():
+            api.wait_update()
+            # print("progress:  tick:%.2f%%" %  td.get_progress())
+        print("done:" + the_dir)
+        api.close()
+        del td
+        del api
+        gc.collect()
+
+
 def scrawl_tick():
     agg = agg_future_dayk()
     logging.info("start filter existed symbols")
@@ -78,25 +100,11 @@ def scrawl_tick():
         currentYearData = agg.getCurrentYearData(ex)
         currentYearData = currentYearData[currentYearData['date'].isin(filteredTradingDates)]
         pathpair=list(map(lambda x:(x[1].strftime('%Y%m%d')+"-"+x[0],x[0],datetime.utcfromtimestamp(x[1].timestamp())) ,currentYearData[['symbol','date']].values))
+        p = Pool(4)
         for i in pathpair:
             if i[1].startswith("sc") or i[1].startswith("nr"):
                 continue
-            the_dir1 = os.path.join(path,ex.upper(),str(i[2].year))
-            if not os.path.exists(the_dir1):
-                os.makedirs(the_dir1)
-            the_dir = os.path.join(path,ex.upper(),str(i[2].year),i[0]+".csv.gz")
-            the_dir2 = os.path.join(path,ex.upper(),str(i[2].year),i[0]+".csv")
-            # print(the_dir)
-            if not os.path.exists(the_dir):
-                api = TqApi(account=TqSim())
-                td =DataDownloader(api, symbol_list=[ex.upper()+"."+i[1]], dur_sec=0,
-                        start_dt=tdates[i[2]]+timedelta(hours=17), end_dt=i[2]+timedelta(hours=16), csv_file_name=the_dir2)
-                while not td.is_finished():
-                    api.wait_update()
-                    # print("progress:  tick:%.2f%%" %  td.get_progress())
-                print("done:" + the_dir)
-                api.close()
-                del td
-                del api
-                gc.collect()
+            p.apply_async(scrawl_single_tick,args=(i,path,ex,tdates))
+        p.close()
+        p.join()
         logging.info(ex+": complete getting tick")
