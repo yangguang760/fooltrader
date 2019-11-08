@@ -61,7 +61,9 @@ def scrawl_single_tick(i,path,ex,tdates):
     the_dir2 = os.path.join(path,ex.upper(),str(i[2].year),i[0]+".csv")
     # print(the_dir)
     if not os.path.exists(the_dir):
+        # print(the_dir)
         api = TqApi(account=TqSim())
+        # api = TqApi(account=TqSim(),url="ws://192.168.56.1:7777")
         td =DataDownloader(api, symbol_list=[ex.upper()+"."+i[1]], dur_sec=0,
                            start_dt=tdates[i[2]]+timedelta(hours=17), end_dt=i[2]+timedelta(hours=16), csv_file_name=the_dir2)
         while not td.is_finished():
@@ -100,7 +102,7 @@ def scrawl_tick():
         currentYearData = agg.getCurrentYearData(ex)
         currentYearData = currentYearData[currentYearData['date'].isin(filteredTradingDates)]
         pathpair=list(map(lambda x:(x[1].strftime('%Y%m%d')+"-"+x[0],x[0],datetime.utcfromtimestamp(x[1].timestamp())) ,currentYearData[['symbol','date']].values))
-        p = Pool(4)
+        p = Pool(2)
         for i in pathpair:
             if i[1].startswith("sc") or i[1].startswith("nr"):
                 continue

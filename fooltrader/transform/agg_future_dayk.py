@@ -176,6 +176,7 @@ class agg_future_dayk(object):
             '聚丙烯':'pp',
             '聚氯乙烯':'v',
             '豆油':'y',
+            '苯乙烯':'eb',
             '粳米':'rr'
         }
         tempdfs=[]
