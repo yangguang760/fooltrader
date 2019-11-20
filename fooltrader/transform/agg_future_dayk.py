@@ -254,7 +254,7 @@ class agg_future_dayk(object):
         aggdf=pd.concat(tempdfs)
         aggdf=aggdf[lambda x: x['品种代码'].apply(lambda y: not y.endswith('计'))]
         aggdf['fproduct'] = aggdf['品种代码'].apply(lambda x:pattern.match(x).groups()[0])
-        aggdf['settleDate'] = aggdf['品种代码'].apply(lambda x:pd.to_datetime('201'+pattern.match(x).groups()[1],format='%Y%m'))
+        aggdf['settleDate'] = aggdf['品种代码'].apply(lambda x:pd.to_datetime(('202' if pattern.match(x).groups()[1].startswith('0') else '201') +pattern.match(x).groups()[1],format='%Y%m'))
         renameMap={
             '品种代码':'symbol',
             '今开盘':'open',
