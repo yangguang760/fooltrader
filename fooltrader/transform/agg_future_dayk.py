@@ -50,14 +50,17 @@ class agg_future_dayk(object):
         return self.funcs[exchange+'c']()
 
     def getShfeHisData(self):
-        pattern = re.compile(r'(\D{1,3})(\d{3,4})')
+        pattern = re.compile(r'(\D{1,3})(\d{3,4}).*')
         dfs=[]
-        for i in range(2009,2019):
-            dir = get_exchange_cache_dir(security_type='future',exchange='shfe')+"/"
-            a=pd.read_excel(dir+str(i)+'_shfe_history_data.xls',header=2,skipfooter=5,usecols=list(range(0,14))).fillna(method='ffill')
+
+        dir = get_exchange_cache_dir(security_type='future',exchange='shfe')+"/his/"
+        for j in os.listdir(dir):
+            a = pd.read_excel(dir+j, header=2, skipfooter=5,
+                                  usecols=list(range(0, 14))).fillna(method='ffill')
             dfs.append(a)
         totaldf = reduce(lambda x,y:x.append(y),dfs)
         totaldf['日期']=pd.to_datetime(totaldf['日期'],format='%Y%m%d')
+        totaldf=totaldf[pd.isnull(totaldf['合约'])==False]
         totaldf['fproduct'] = totaldf['合约'].apply(lambda x:pattern.match(x).groups()[0])
         totaldf['settleDate'] = totaldf['合约'].apply(lambda x:pd.to_datetime('20'+pattern.match(x).groups()[1],format='%Y%m'))
         renameMap={
@@ -83,7 +86,7 @@ class agg_future_dayk(object):
         return totaldf
 
     def getShfeCurrentYearData(self):
-        dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='shfe'),"2019_day_kdata")
+        dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='shfe'),"2020_day_kdata")
         file_list=os.listdir(dir)
         tempdfs=[]
         for file in file_list:
@@ -157,7 +160,7 @@ class agg_future_dayk(object):
         return totaldf
 
     def getDceCurrentYearData(self):
-        dailyFileYear = ['2018','2019']
+        dailyFileYear = ['2018','2019','2020']
         symbolMap={
             '豆一':'a',
             '豆二':'b',
@@ -216,6 +219,7 @@ class agg_future_dayk(object):
         file_list=os.listdir(dir)
         tempdfs=[]
         for file in file_list:
+            print(file)
             temp_df=pd.read_table(os.path.join(dir,file), header=1, encoding='gbk', sep='\s*\|')
             temp_df.rename(index=str,columns={'品种月份':'品种代码'},inplace=True)
             tempdfs.append(temp_df)
@@ -243,7 +247,7 @@ class agg_future_dayk(object):
 
     def getCzceCurrentYearData(self):
         pattern = re.compile(r'(\D{1,3})(\d{3,4})')
-        dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='czce'),"2019_day_kdata")
+        dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='czce'),"2020_day_kdata")
         file_list=os.listdir(dir)
         tempdfs=[]
         for file in file_list:
@@ -279,10 +283,13 @@ class agg_future_dayk(object):
         file_list=os.listdir(dir)
         tempdfs=[]
         for file in file_list:
-            temp_df = pd.read_csv(os.path.join(dir,file),encoding='gbk',sep='\s*\,')
-            temp_df['date']=pd.to_datetime(file.split(".")[0],format='%Y%m%d')
-            temp_df.rename(index=str,columns={'合约代码':'品种代码'},inplace=True)
-            tempdfs.append(temp_df)
+            try:
+                temp_df = pd.read_csv(os.path.join(dir,file),encoding='gbk',sep='\s*\,', engine="python")
+                temp_df['date']=pd.to_datetime(file.split(".")[0],format='%Y%m%d')
+                temp_df.rename(index=str,columns={'合约代码':'品种代码'},inplace=True)
+                tempdfs.append(temp_df[~temp_df['品种代码'].str.contains("-")])
+            except BaseException:
+                print(file+" invalid")
         aggdf=pd.concat(tempdfs)
         aggdf=aggdf[lambda x: x['品种代码'].apply(lambda y: not y.endswith('计'))]
         aggdf['fproduct'] = aggdf['品种代码'].apply(lambda x:pattern.match(x).groups()[0])

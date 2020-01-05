@@ -40,7 +40,7 @@ class FutureShfeSpider(scrapy.Spider):
 
         if self.dataType=='day_kdata':
 
-            daterange=pd.date_range(start='2019-01-01',end=pd.Timestamp.today())
+            daterange=pd.date_range(start='2020-01-01',end=pd.Timestamp.today())
             daterange=daterange[daterange.dayofweek<5]
             # 每天的数据
             for the_date in daterange:

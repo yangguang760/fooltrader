@@ -31,7 +31,7 @@ class FutureCzceSpider(scrapy.Spider):
         self.dataType =self.settings.get("dataType")
         if self.dataType is None or self.dataType=='day_kdata':
             today = pd.Timestamp.today()
-            for date in pd.date_range(start='20190101',end=today):
+            for date in pd.date_range(start='20200101',end=today):
                 the_dir = get_exchange_cache_path(security_type='future',exchange='czce',the_date=to_timestamp(date),data_type='day_kdata')+'.xls'
                 if(date.dayofweek<5 and not os.path.exists(the_dir)):
                     yield Request(url="http://www.czce.com.cn/cn/DFSStaticFiles/Future/"+date.strftime("%Y/%Y%m%d")+"/FutureDataDaily.xls",callback=self.download_czce_kline_data,meta={'filename':the_dir})
@@ -39,7 +39,7 @@ class FutureCzceSpider(scrapy.Spider):
             yield Request(url="http://www.czce.com.cn/cn/jysj/lshqxz/H770319index_1.htm",callback=self.download_czce_history_data)
         elif self.dataType=='inventory':
             today = pd.Timestamp.today()
-            for date in pd.date_range(start='20190101',end=today):
+            for date in pd.date_range(start='20200101',end=today):
                 the_dir = get_exchange_cache_path(security_type='future',exchange='czce',the_date=to_timestamp(date),data_type='inventory')+'.xls'
                 if(date.dayofweek<5 and not os.path.exists(the_dir)):
                     yield Request(url="http://www.czce.com.cn/cn/DFSStaticFiles/Future/"+date.strftime("%Y/%Y%m%d")+"/FutureDataHolding.xls",callback=self.download_czce_kline_data,meta={'filename':the_dir})

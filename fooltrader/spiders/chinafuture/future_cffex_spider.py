@@ -30,14 +30,14 @@ class FutureCffexSpider(scrapy.Spider):
     def start_requests(self):
         self.dataType =self.settings.get("dataType")
         if self.dataType is None or self.dataType=='day_kdata':
-            daterange=pd.date_range(start='2019-01-01',end=pd.Timestamp.today())
+            daterange=pd.date_range(start='2020-01-01',end=pd.Timestamp.today())
             daterange=daterange[daterange.dayofweek<5]
             for i in daterange:
                 the_dir = get_exchange_cache_path(security_type='future',exchange='cffex',data_type='day_kdata',the_date=to_timestamp(i))+".csv"
                 if not os.path.exists(the_dir):
                     yield Request(url="http://www.cffex.com.cn/sj/hqsj/rtj/"+i.strftime("%Y%m/%d/%Y%m%d")+"_1.csv",callback=self.download_cffex_history_data_file,meta={'filename':the_dir})
         elif self.dataType =='inventory':
-            daterange=pd.date_range(start='2019-01-01',end=pd.Timestamp.today())
+            daterange=pd.date_range(start='2020-01-01',end=pd.Timestamp.today())
             k=['IF','IC','IH','T','TF']
             daterange=daterange[daterange.dayofweek<5]
             for i in daterange:
@@ -57,10 +57,17 @@ class FutureCffexSpider(scrapy.Spider):
             with open(the_path, "wb") as f:
                 f.write(response.body)
                 f.flush()
+            with open(the_path+"new","w",encoding='gbk') as ff:
+                for line in open(the_path,encoding='gbk'):
+                    if not '计' in line:
 
+                        ff.write(line)
+                        ff.flush()
         else:
             self.logger.error(
                 "get cffex year  data failed:the_path={} url={} content type={} ".format(
                                                                                                  the_path,
                                                                                                  response.url,
                                                                                                  content_type_header))
+        #os.system("grep -v '计' "+the_path+" >" +the_path+"new")
+        os.system("mv " +the_path + "new " + the_path )

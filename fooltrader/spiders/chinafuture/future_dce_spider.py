@@ -31,6 +31,7 @@ class FutureDceSpider(scrapy.Spider):
         self.dataType =self.settings.get("dataType")
         if self.dataType is None:
             return self.request_currentyear_kdata()
+        #    return self.request_history_kdata()
         elif self.dataType == 'historyk':
             return self.request_history_kdata()
         elif self.dataType == 'inventory':
@@ -41,7 +42,7 @@ class FutureDceSpider(scrapy.Spider):
     def request_inventory_data(self):
         today = pd.Timestamp.today()
         requests = []
-        for date in pd.date_range(start='20190101',end=today):
+        for date in pd.date_range(start='20200101',end=today):
             the_dir = get_exchange_cache_path(security_type='future', exchange='dce',the_date=to_timestamp(date),data_type="day_inventory")+'.zip'
             if(date.dayofweek<5 and not os.path.exists(the_dir)):
                 requests.append(FormRequest(url="http://www.dce.com.cn/publicweb/quotesdata/exportMemberDealPosiQuotesBatchData.html",formdata={
@@ -61,7 +62,7 @@ class FutureDceSpider(scrapy.Spider):
     def request_currentyear_kdata(self):
         today = pd.Timestamp.today()
         requests=[]
-        for date in pd.date_range(start='20190101',end=today):
+        for date in pd.date_range(start='20200101',end=today):
             the_dir = get_exchange_cache_path(security_type='future', exchange='dce',the_date=to_timestamp(date),data_type="day_kdata")+'.xls'
             if(date.dayofweek<5 and not os.path.exists(the_dir)):
                 requests.append( FormRequest(url="http://www.dce.com.cn/publicweb/quotesdata/exportDayQuotesChData.html",formdata={
