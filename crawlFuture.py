@@ -24,4 +24,7 @@ logging.info("dce done")
 logging.info("start shfe")
 crawl_shfe_quote()
 logging.info("shfe done")
+logging.info("start ine")
+crawl_ine_quote()
+logging.info("ine done")
 

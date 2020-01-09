@@ -62,10 +62,10 @@ def scrawl_single_tick(i,path,ex,tdates):
     the_dir = os.path.join(path,ex.upper(),str(i[2].year),i[0]+".csv.gz")
     the_dir2 = os.path.join(path,ex.upper(),str(i[2].year),i[0]+".csv")
     if not os.path.exists(the_dir):
-    #    print(the_dir)
-    #    print(i)
-    #    print(tdates[i[2]])
-    #    print(i[2])
+        print(the_dir)
+        print(i)
+        print(tdates[i[2]])
+        print(i[2])
         api = TqApi(account=TqSim())
         # api = TqApi(account=TqSim(),url="ws://192.168.56.1:7777")
         td =DataDownloader(api, symbol_list=[ex.upper()+"."+i[1]], dur_sec=0,
@@ -90,7 +90,7 @@ def scrawl_tick():
     logging.info("start filter existed symbols")
 
 
-    the_path = get_exchange_cache_dir(security_type='future', exchange='shfe',the_year='2020',
+    the_path = get_exchange_cache_dir(security_type='future', exchange='ine',the_year='2020',
                                        data_type='day_kdata')
 
     trading_dates = sorted(os.listdir(the_path))
@@ -101,9 +101,10 @@ def scrawl_tick():
         if i>0:
             tdates[datetime.strptime(trading_dates[i],'%Y%m%d')]=datetime.strptime(trading_dates[i-1],'%Y%m%d')
     path = TICK_PATH
-    filteredTradingDates = sorted(list(filter(lambda y:y>datetime(2018,11,30,0,0), map(lambda x:datetime.strptime(x,'%Y%m%d'),trading_dates))))
+    #filteredTradingDates = sorted(list(filter(lambda y:y>datetime(2018,11,30,0,0), map(lambda x:datetime.strptime(x,'%Y%m%d'),trading_dates))))
+    filteredTradingDates = sorted(list(filter(lambda y:y>datetime(2016,11,30,0,0), map(lambda x:datetime.strptime(x,'%Y%m%d'),trading_dates))))
     logging.info("complete filter existed symbols")
-    exchanges = ["shfe","cffex","dce","czce"]
+    exchanges = ["shfe","cffex","dce","czce","ine"]
     logging.info("start getting tick data")
     # api = TqApi(account=TqSim(),url="ws://192.168.56.1:7777")
     for ex in exchanges:
@@ -114,7 +115,7 @@ def scrawl_tick():
         #print(pathpair)
         p = Pool(2)
         for i in pathpair:
-            if i[1].startswith("sc") or i[1].startswith("nr"):
+            if (i[1].startswith("sc") or i[1].startswith("nr")) and ex=="shfe":
                 continue
             p.apply_async(scrawl_single_tick,args=(i,path,ex,tdates))
 

@@ -10,6 +10,8 @@ class agg_future_dayk(object):
     def __init__(self):
         self.funcs['shfeh']=self.getShfeHisData
         self.funcs['shfec']=self.getShfeCurrentYearData
+        self.funcs['ineh']=self.getIneHisData
+        self.funcs['inec']=self.getIneCurrentYearData
         self.funcs['dceh']=self.getDceHisData
         self.funcs['dcec']=self.getDceCurrentYearData
         self.funcs['czceh']=self.getCzceHisData
@@ -19,7 +21,7 @@ class agg_future_dayk(object):
 
     def getCurrentYearAllData(self,exchange=None):
         if exchange is None:
-            exchanges=['cffex','dce','czce','shfe']
+            exchanges=['cffex','dce','czce','shfe',"ine"]
             pds = list(map(lambda x:self.getCurrentYearData(x),exchanges))
             finalpd = pd.concat(pds)
         else:
@@ -32,7 +34,7 @@ class agg_future_dayk(object):
 
     def getAllData(self,exchange=None):
         if exchange is None:
-            exchanges=['cffex','dce','czce','shfe']
+            exchanges=['cffex','dce','czce','shfe',"ine"]
             pds = list(map(lambda x:self.getHisData(x),exchanges))+list(map(lambda x:self.getCurrentYearData(x),exchanges))
             finalpd = pd.concat(pds)
         else:
@@ -121,6 +123,77 @@ class agg_future_dayk(object):
         aggdf=aggdf[['symbol','date','open','high','low','close','settle','range','range2','volume','inventory','fproduct','settleDate']]
         return aggdf
 
+    def getIneHisData(self):
+        pattern = re.compile(r'(\D{1,3})(\d{3,4}).*')
+        dfs=[]
+
+        dir = get_exchange_cache_dir(security_type='future',exchange='ine')+"/his/"
+        for j in os.listdir(dir):
+            a = pd.read_excel(dir+j, header=2, skipfooter=5,
+                              usecols=list(range(0, 14))).fillna(method='ffill')
+            dfs.append(a)
+        totaldf = reduce(lambda x,y:x.append(y),dfs)
+        totaldf['日期']=pd.to_datetime(totaldf['日期'],format='%Y%m%d')
+        totaldf=totaldf[pd.isnull(totaldf['合约'])==False]
+        totaldf['fproduct'] = totaldf['合约'].apply(lambda x:pattern.match(x).groups()[0])
+        totaldf['settleDate'] = totaldf['合约'].apply(lambda x:pd.to_datetime('20'+pattern.match(x).groups()[1],format='%Y%m'))
+        renameMap={
+            '合约':'symbol',
+            '日期':'date',
+            '前收盘':'preClose',
+            '前结算':'preSettle',
+            '开盘价':'open',
+            '最高价':'high',
+            '最低价':'low',
+            '收盘价':'close',
+            '结算价':'settle',
+            '涨跌1':'range',
+            '涨跌2':'range2',
+            '成交量':'volume',
+            '成交金额':'amount',
+            '持仓量':'inventory'
+        }
+        totaldf.rename(index=str,columns=renameMap,inplace=True)
+        totaldf=totaldf[['symbol','date','open','high','low','close','settle','range','range2','volume','inventory','fproduct','settleDate']]
+        print("done")
+        # totaldf.to_pickle('testdf.pickle')
+        return totaldf
+
+    def getIneCurrentYearData(self):
+        dir = os.path.join(get_exchange_cache_dir(security_type='future',exchange='ine'),"2020_day_kdata")
+        file_list=os.listdir(dir)
+        tempdfs=[]
+        for file in file_list:
+            if len(file)==8:
+                with open(os.path.join(dir,file)) as f:
+                    load_dict = json.load(f)
+                    temp_df = pd.DataFrame(data=load_dict['o_curinstrument'])
+                    temp_df['date'] = file
+                    temp_df['date'] = pd.to_datetime(temp_df['date'],format="%Y%m%d")
+                    tempdfs.append(temp_df)
+        aggdf=pd.concat(tempdfs)
+        aggdf= aggdf[aggdf['DELIVERYMONTH']!='小计' ]
+        aggdf= aggdf[aggdf['DELIVERYMONTH']!='合计' ]
+        aggdf= aggdf[aggdf['DELIVERYMONTH']!=""]
+        aggdf= aggdf[aggdf['DELIVERYMONTH']!="efp"]
+        aggdf['symbol']=aggdf['PRODUCTID'].apply(lambda x:x.strip().replace("_f",""))+aggdf['DELIVERYMONTH']
+        aggdf['fproduct']=aggdf['PRODUCTID'].apply(lambda x:x.strip().replace("_f",""))
+        aggdf['settleDate']=aggdf['DELIVERYMONTH'].apply(lambda x:pd.to_datetime('20'+x,format='%Y%m'))
+
+        renameMap={
+            'OPENPRICE':'open',
+            'HIGHESTPRICE':'high',
+            'LOWESTPRICE':'low',
+            'CLOSEPRICE':'close',
+            'SETTLEMENTPRICE':'settle',
+            'ZD1_CHG':'range',
+            'ZD2_CHG':'range2',
+            'VOLUME':'volume',
+            'OPENINTEREST':'inventory'
+        }
+        aggdf.rename(index=str,columns=renameMap,inplace=True)
+        aggdf=aggdf[['symbol','date','open','high','low','close','settle','range','range2','volume','inventory','fproduct','settleDate']]
+        return aggdf
 
     def getDceHisData(self):
         pattern = re.compile(r'(\D{1,3})(\d{3,4})')
